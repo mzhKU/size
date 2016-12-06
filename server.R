@@ -49,34 +49,45 @@ function(input, output)
         out$hr <- out$l_exp / out$l_conv
     })
 
-    # # Required number of events to observe given Hazard Ratio at defined
-    # # alpha and beta.
-    # output$k <- renderText({
-    #     alpha <- input$alpha
-    #     beta  <- input$beta
-    #     HR    <- out$hr
-    #     out$k <- ceiling(4*(qnorm(1-alpha/2) + qnorm(1-beta))^2/log(HR)^2)
-    # })
-
-    # Patients per study arm.
-    # output$rp <- renderText({
-    #     out$n <- ceiling(out$k/(out$e_conv + out$e_exp))
-    # })
-
     output$plot <- renderPlot({
-        alpha <- input$alpha
+        alpha_sur <- input$alpha_sur
         HR <- out$hr
 
         # Beta range.
         beta <- c(1.0:50.0)/100 
 
-        k <- ceiling(4*(qnorm(1-alpha/2) + qnorm(1-beta))^2/log(HR)^2)
+        k <- ceiling(4*(qnorm(1-alpha_sur/2) + qnorm(1-beta))^2/log(HR)^2)
         y <- ceiling(k/(out$e_conv + out$e_exp))
 
         d <- data.frame(x=beta, y=y)
         a <- ggplot(d, aes(x, y)) + geom_line(color="blue", size=2) +
                                     xlab("Beta") + ylab("Patients per Study arm") +
                                     ggtitle("Two-arm Study Size") + 
+                                    theme(text=element_text(size=20)) +
+                                    scale_x_continuous(breaks=c(0:100)/10,
+                                                       minor_breaks=c(0:100)/100)
+        print(a)
+    })
+
+    output$n <- renderPlot({
+        prop1 <- input$prop1
+        prop2 <- input$prop2
+        alpha_prop <- input$alpha_prop
+        prop <- (input$prop1 + input$prop2)/2
+        
+        # Beta range.
+        beta <- c(1.0:50.0)/100 
+        
+        y <- ceiling( 
+                      (qnorm(1-alpha_prop/2)*sqrt(2*prop*(1-prop)) +
+                       qnorm(1-beta)*sqrt(prop1*(1-prop1) + prop2*(1-prop2))
+                      )^2 / (prop1-prop2)^2
+                    )
+
+        d <- data.frame(x=beta, y=y)
+        a <- ggplot(d, aes(x, y)) + geom_line(color="blue", size=2) +
+                                    xlab("Beta") + ylab("Participants Total") +
+                                    ggtitle("Comparison of Two Proportions") + 
                                     theme(text=element_text(size=20)) +
                                     scale_x_continuous(breaks=c(0:100)/10,
                                                        minor_breaks=c(0:100)/100)
