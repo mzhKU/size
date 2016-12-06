@@ -49,7 +49,7 @@ function(input, output)
         out$hr <- out$l_exp / out$l_conv
     })
 
-    output$plot <- renderPlot({
+    output$plot_survival <- renderPlot({
         alpha_sur <- input$alpha_sur
         HR <- out$hr
 
@@ -61,33 +61,57 @@ function(input, output)
 
         d <- data.frame(x=beta, y=y)
         a <- ggplot(d, aes(x, y)) + geom_line(color="blue", size=2) +
-                                    xlab("Beta") + ylab("Patients per Study arm") +
-                                    ggtitle("Two-arm Study Size") + 
+                                    xlab("Beta") + ylab("Patients [Total]") +
+                                    ggtitle("Survival Study Sample Size") + 
                                     theme(text=element_text(size=20)) +
                                     scale_x_continuous(breaks=c(0:100)/10,
                                                        minor_breaks=c(0:100)/100)
         print(a)
     })
 
-    output$n <- renderPlot({
+    output$prop <- renderPlot({
         prop1 <- input$prop1
         prop2 <- input$prop2
         alpha_prop <- input$alpha_prop
         prop <- (input$prop1 + input$prop2)/2
+        lost_prop <- input$lost_prop
         
         # Beta range.
         beta <- c(1.0:50.0)/100 
         
         y <- ceiling( 
-                      (qnorm(1-alpha_prop/2)*sqrt(2*prop*(1-prop)) +
+                      (1/(1-lost_prop))*2*(qnorm(1-alpha_prop/2)*sqrt(2*prop*(1-prop)) +
                        qnorm(1-beta)*sqrt(prop1*(1-prop1) + prop2*(1-prop2))
                       )^2 / (prop1-prop2)^2
                     )
 
         d <- data.frame(x=beta, y=y)
         a <- ggplot(d, aes(x, y)) + geom_line(color="blue", size=2) +
-                                    xlab("Beta") + ylab("Participants Total") +
+                                    xlab("Beta") + ylab("Participants [Total]") +
                                     ggtitle("Comparison of Two Proportions") + 
+                                    theme(text=element_text(size=20)) +
+                                    scale_x_continuous(breaks=c(0:100)/10,
+                                                       minor_breaks=c(0:100)/100)
+        print(a)
+    })
+
+    output$cont <- renderPlot({
+        alpha_cont <- input$alpha_cont
+        delta <- input$delta
+        sigma <- input$sigma
+        lost_cont  <- input$lost_cont
+
+        # Beta range.
+        beta <- c(1.0:50.0)/100 
+        
+        y <- ceiling( 
+                      2*(2*(qnorm(1-alpha_cont/2) + qnorm(1-beta))^2/(delta/sigma)^2)/(1-lost_cont)
+                    )
+
+        d <- data.frame(x=beta, y=y)
+        a <- ggplot(d, aes(x, y)) + geom_line(color="blue", size=2) +
+                                    xlab("Beta") + ylab("Participants [Total]") +
+                                    ggtitle("Continuous Difference between Two Groups") + 
                                     theme(text=element_text(size=20)) +
                                     scale_x_continuous(breaks=c(0:100)/10,
                                                        minor_breaks=c(0:100)/100)

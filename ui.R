@@ -38,7 +38,7 @@ fluidPage(
                 ),
                 mainPanel(
                     wellPanel(
-                        plotOutput("plot")
+                        plotOutput("plot_survival")
                     )
                 )
             )
@@ -50,13 +50,33 @@ fluidPage(
                         column(4,
                             numericInput("prop1", "Prop. 1", 0.2, step=0.05),
                             numericInput("prop2", "Prop. 2", 0.5, step=0.05),
-                            numericInput(inputId="alpha_prop", "Alpha", value=0.05, step=0.01)
+                            numericInput(inputId="alpha_prop", "Alpha", value=0.05, step=0.01),
+                            numericInput(inputId="lost_prop", "Lost", value=0.15, step=0.05)
                         )
                     )
                 ),
                 mainPanel(
                     wellPanel(
-                        plotOutput("n")
+                        plotOutput("prop")
+                    )
+                )
+            )
+        ),
+        tabPanel("Continuous",
+            sidebarLayout(
+                sidebarPanel(
+                    fluidRow(
+                        column(4,
+                            numericInput(inputId="alpha_cont", "Alpha", 0.05, step=0.01),
+                            numericInput(inputId="delta", "Delta", 5, step=1),
+                            numericInput(inputId="sigma", "Sigma", value=20, step=1),
+                            numericInput(inputId="lost_cont", "Lost", value=0.2, step=0.1)
+                        )
+                    )
+                ),
+                mainPanel(
+                    wellPanel(
+                        plotOutput("cont")
                     )
                 )
             )
